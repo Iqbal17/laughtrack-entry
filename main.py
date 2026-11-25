@@ -48,6 +48,16 @@ Pass 2 — "I bought the dip. Then the dip bought a shovel, dug deeper,
    tightened "is now renting me the hole" to "now charges me rent for
    the hole" — shorter, punchier, and the punchline ("charges me
    rent") lands on the last word group. Final line, 92 characters.
+
+Revision note (Pass 3, 26 Nov 2026): the entry line itself is unchanged
+— same 92 characters, same output bytes. The code was refactored so
+the joke text has one home: build_entry() returns the line, main()
+asks it for the line, and the existing check_gate() guard still
+validates it (1–200 characters, non-blank, single line) before
+anything is written. The helper exists so the line is never copied
+or retyped at the write site, and the guard exists so a future typo
+fails loudly instead of shipping a bad entry. Output unchanged by
+design: entry.txt still gets exactly the final line plus a newline.
 """
 
 import os
@@ -55,6 +65,11 @@ import os
 ENTRY = "I bought the dip. The dip bought a shovel, dug deeper, and now charges me rent for the hole."
 
 MAX_CHARS = 200
+
+
+def build_entry():
+    """Return the entry line. Single source of truth for the joke text."""
+    return ENTRY
 
 
 def check_gate(text):
@@ -76,9 +91,10 @@ def entry_path():
 
 
 def main():
-    check_gate(ENTRY)
+    line = build_entry()
+    check_gate(line)
     with open(entry_path(), "w", encoding="utf-8") as f:
-        f.write(ENTRY + "\n")
+        f.write(line + "\n")
 
 
 if __name__ == "__main__":
